@@ -12,12 +12,31 @@ import datetime
 import time
 import hashlib
 import hmac
-import sys # sys.exit()
+import sys
 
-# debug mode
-# d = True
+def t():
+    """Returns current date.
+    """
+    return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-# TODO: set nonce_prefix to last N letters of key/secret?
+
+def retry_connection(f):
+    """Decorator. Recconect on failure.
+    """
+    def retry(*args, **kwargs):
+        seconds_to_retry = 5
+        success = False
+        while (success == False):
+            try:
+                result = f(*args, **kwargs)
+                success = True
+                return result
+            except:
+                print "{0}: {1} --> connection problems . retry in {2} seconds.".format(t(), f.__name__, seconds_to_retry)
+                time.sleep(seconds_to_retry)
+        # return None
+    return retry
+
 class Q:
     """BTC-E API class.
     Methods:
@@ -39,15 +58,18 @@ class Q:
     CancelOrder()   -- cancel existing order.
 
     Usage:
-    from qbtce import qbtce
-    q = QBTCE()
-    q.getInfo()
+    from qbtce import Q
+    q = Q(key='KEY', secret='SECRET')
+    q.ticker('btc_usd') # btc/usd ticker
 
     """
+
+
     # set default key and secret
     __default_key = ""
     __default_secret = ""
 
+    # TODO: set nonce_prefix to last N letters of key/secret?
     def __init__(self, key=__default_key, secret=__default_secret, nonce_prefix=''):
         """Constructor 
 
@@ -75,7 +97,7 @@ class Q:
             f.write(str(self.nonce))
             f.close()
         except:
-            print '[error]: failed saving nonce value.'
+            print '{0}: failed saving nonce value.'.format(t())
         
     def __incr_nonce(self):
         """Increment the nonce value.
@@ -108,18 +130,22 @@ class Q:
         """
         
         request_url = self.public_base_url + pair + '/' + method_name
-        try:
-            api_response = urllib.urlopen(request_url)
-        except:
-            print "[error]: connection failed. {0}".format(request_url)
+
+        connection = retry_connection(urllib.urlopen)
+        api_response = connection(request_url)
+
+        # try to parse JSON
         try:
             api_json = json.load(api_response)
         except:
-            print "[error]: failed parsing JSON."
+            print "{0}: failed parsing JSON. Possible reasons: API has been changed? Bad request? Quitting.\nrequest_url = {1}".format(t(), request_url)
+            sys.exit(1)
+
         return api_json
 
+
     def __trade_query(self, method_name, method_params):
-        """Calls the trade API methods (auth-required): getINfo, TransHistory, TradeHistory, ActiveOrders, Trade, CancelOrder
+        """Calls the trade API methods (auth-required): getInfo, TransHistory, TradeHistory, ActiveOrders, Trade, CancelOrder
         returns response as JSON object.
 
         Arguments:
@@ -147,14 +173,15 @@ class Q:
                        "Key":self.BTCE_API_KEY,
                        "Sign":sign}
         conn = httplib.HTTPSConnection("btc-e.com")
-        conn.request("POST", "/tapi", params, headers)
-    
-    
+
+        connection = retry_connection(conn.request)
+        connection("POST", "/tapi", params, headers)
+
         response = conn.getresponse()
 
-        # if response code is different then 200, print it
+        # if response code is different than 200, print it
         if response.status != 200:
-            print "[info]: {0} {1}".format(response.status, response.reason)
+            print "{0}: response status: {1} reason: {2}".format(t(), response.status, response.reason)
         api_json = json.load(response)
         conn.close()
         
@@ -162,7 +189,7 @@ class Q:
         if 'error' in api_json and str(api_json).find('invalid nonce') != -1:
             self.__incr_nonce()
         elif 'error' in api_json: # other error
-            print "[error]: {0}".format(api_json)
+            print "{0} an error has been occured.\napi_json: {1}".format(t(), api_json)
         return api_json
 
     # --- basic public methods --- #
