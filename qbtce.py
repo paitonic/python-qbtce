@@ -74,7 +74,7 @@ class Q:
         """Constructor 
 
         Initialize properties of 'Connection' instance.
-        Keyword arguments:
+        Keyword parameters:
         Name            Type     Desc
         key             str      BTC-E key
         secret          str      BTC-E secret
@@ -119,14 +119,14 @@ class Q:
     def __public_query(self, method_name, pair):
         """Calls public API methods: fee, ticker, trades, depth and returns response as JSON object.
 
-        Arguments:
+        Parameters:
         Name            Type    Desc
         method_name     str     method name as described in the API
         pair            str     pair upon the method is called on, i.e. 'btc_usd'
 
         Returns:
-        Name        Type    Desc
-        api_json    JSON    response from the server
+        Name        Type    				Desc
+        api_json    list of json(dict)    	response from the server
         """
         
         request_url = self.public_base_url + pair + '/' + method_name
@@ -146,16 +146,16 @@ class Q:
 
     def __trade_query(self, method_name, method_params):
         """Calls the trade API methods (auth-required): getInfo, TransHistory, TradeHistory, ActiveOrders, Trade, CancelOrder
-        returns response as JSON object.
+        returns response as list of json's.
 
-        Arguments:
+        Parameters:
         Name            Type    Desc
         method_name     str     method name as described in the API
-        method_params   dict    method arguments, each method have different args!
+        method_params   dict    method parameters, each method have different args!
 
         Returns:
-        Name            Type    Desc
-        api_json        JSON    response from the server
+        Name            Type    				Desc
+        api_json        list of json(dict)    response from the server
         """
         params = {'nonce': self.__incr_nonce(), 'method': method_name}
         
@@ -194,92 +194,128 @@ class Q:
 
     # --- basic public methods --- #
     def fee(self, pair):
-        """Return fee for requested pair.
-        Arguments:
+		"""Returns fee for requested pair.
+        parameters:
         Name    Type    Desc
-        pair    str     valid pair like 'btc_usd, ltc_usd etc.'
+        pair    str     valid pair like 'btc_usd', 'ltc_usd' etc.
 
         Returns:
-        Name    Type    Desc
-        -       JSON    fee
+        Name    Type    			Desc
+        -       list of json(dict)    fee
         """
         return self.__public_query('fee', pair)
 
     def ticker(self, pair):
-        """Return ticker for requested pair."""
+		"""Returns ticker for requested pair.
+        parameters:
+        Name    Type    Desc
+        pair    str     valid pair like 'btc_usd', 'ltc_usd' etc.
+
+        Returns:
+        Name    Type    		Desc
+        -       list of json(dict)    ticker
+        """
         return self.__public_query('ticker', pair)
 
     def trades(self, pair):
-        """Return trades for requested pair."""
+		"""Returns trades for requested pair.
+        parameters:
+        Name    Type    Desc
+        pair    str     valid pair like 'btc_usd', ltc_usd' etc.
+
+        Returns:
+        Name    Type    		Desc
+        -       list of json(dict)    trades
+        """
         return self.__public_query('trades', pair)
 
     def depth(self, pair):
-        """Return depth for requested pair."""
+		"""Returns depth for requested pair.
+        Parameters:
+        Name    Type    Desc
+        pair    str     valid pair like 'btc_usd', ltc_usd' etc.
+
+        Returns:
+        Name    Type    		Desc
+        -       list of json(dict)    depth
+        """
         return self.__public_query('depth', pair)
 
-    # --- basic trade methods --- #
+    # --- trade methods --- #
     def getInfo(self):
-        """return information about:
-        -- currenct balance
+        """Returns information about:
+        -- current balance
         -- API key priviliges
         -- number of transactions
         -- number of open orders
         -- server time
 
-        no arguments.
-        returns JSON object
+        Parameters: None
+		Returns:
+        Name    Type    			Desc
+        -       list of json(dict)  various information about the account.
         """
         return self.__trade_query('getInfo', {})
 
     def TransHistory(self, params):
-        """Return history of transactions
-        Arguments:
+        """Returns history of transactions
+        Parameters:
         Name    Type    Desc
         params  dict    keys: from, count, from_id, 
                         end_id, order, since, end
 
-        returns JSON object.
+		Returns:
+        Name    Type    			Desc
+        -       list of json(dict)  transaction history.
         """
         return self.conn.trade_query('TransHistory', params)
 
     def TradeHistory(self, params):
-        """Return history of orders
-        Arguments:
+        """Returns history of orders
+        Parameters:
         Name    Type    Desc
-        params  dict    keys: from, count, from_id, 
-                        end_id, order, since, end, pair
+        params  dict    allowed keys: 'from', 'count', 'from_id', 
+                        'end_id', 'order', 'since', 'end', 'pair'
 
-        returns JSON object.
+		Returns:
+        Name    Type    			Desc
+        -       list of json(dict) 	יhistory of orders.
         """
         return self.__trade_query('TradeHistory', params)
 
     def ActiveOrders(self, params):
-        """Return active orders
-        Arguments:
-        Name    Type    Desc
-        params  dict    keys: pair
+        """Returns active orders
+        Parameters:
+        Name    Type    Desc			
+        params  dict    allowed keys: 'pair'. i.e {'pair': 'ltc_usd'}
 
-        returns JSON object.
+		Returns:
+        Name    Type    			Desc
+        -       list of json(dict)  active orders
         """
         return self.__trade_query('ActiveOrders', params)
 
     def Trade(self, params):
         """This method places an order.
-        Arguments:
+        Parameters:
         Name    Type    Desc
-        params  dict    keys: pair, type, rate, amount
+        params  dict    allowed keys: 'pair', 'type', 'rate', 'amount'
 
-        returns JSON object.
+		Returns:
+        Name    Type    			Desc
+        -       list of json(dict)  returns funds, remains, received and more.
         """
         return self.__trade_query('Trade', params)
 
     def CancelOrder(self, params):
         """Cancel order.
-        Arguments:
+        Parameters:
         Name    Type    Desc
         params  dict    keys: order_id
 
-        returns JSON object.
+		Returns:
+        Name    Type    			Desc
+        -       list of json(dict)  return order_id, funds.
         """
         return self.__trade_query('CancelOrder', params)
 
