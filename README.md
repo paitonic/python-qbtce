@@ -19,9 +19,9 @@ BTC-E API - implementation of btc-e.com API (crypto-currency exchange).
 
 
 
-## Q class
+#### Q class
 
-### \_\_init\_\_(key=\_\_default\_key, secret=\_\_default\_secret, nonce\_prefix='')
+###### \_\_init\_\_(key=\_\_default\_key, secret=\_\_default\_secret, nonce\_prefix='')
 Class constructor.
 <table>
 <tr>
@@ -38,19 +38,19 @@ Class constructor.
 </tr>
 </table>
 
-### \_\_save\_nonce(self)
+###### \_\_save\_nonce(self)
 Responsible for saving nonce value to file (self.nonce_storage)
 
-### \_\_incr\_nonce(self)
+###### \_\_incr\_nonce(self)
 Incrementing nonce value.
 
-### \_\_load\_nonce(self)
+###### \_\_load\_nonce(self)
 Loads nonce value from storage(file self.nonce_storage).
 
-### \_\_public\_query(self, method\_name, pair)
+###### \_\_public\_query(self, method\_name, pair)
 Accepts method_name, pair and makes the actual call to btc-e. used for public methods such as: fee, ticker, trades, depth.
 
-#### Parameters
+###### Parameters
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -63,7 +63,7 @@ Accepts method_name, pair and makes the actual call to btc-e. used for public me
 </tr>
 </table>
 
-#### Returns
+###### Returns
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -73,11 +73,11 @@ Accepts method_name, pair and makes the actual call to btc-e. used for public me
 </tr>
 </table>
 
-### \_\_trade\_query(self, method\_name, method\_params):
+###### \_\_trade\_query(self, method\_name, method\_params):
 Calls the btc-e API methods for trading (auth-required): getInfo, TransHistory, TradeHistory, ActiveOrders, Trade, CancelOrder
 returns response as list of json's.
 
-#### Parameters
+###### Parameters
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -90,7 +90,7 @@ returns response as list of json's.
 </tr>
 </table>
 
-#### Returns
+###### Returns
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -99,11 +99,11 @@ returns response as list of json's.
 <td>api_json</td><td>list of json(dict)</td><td>response from the server</td>
 </table>
 
-### ------ btc-e API public (non-auth-required) methods ------
-### fee(self, pair)
+##### btc-e API public (non-auth-required) methods
+###### fee(self, pair)
 Return fee for requested pair.
 
-#### Parameters
+###### Parameters
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -112,7 +112,7 @@ Return fee for requested pair.
 <td>pair</td><td>str</td><td>valid pair like 'btc_usd', 'ltc_usd' etc.</td>
 </table>
 
-#### Returns
+###### Returns
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -122,9 +122,9 @@ Return fee for requested pair.
 </table>
 
 
-### ticker(self, pair)
+###### ticker(self, pair)
 Return ticker for requested pair.
-#### Parameters
+###### Parameters
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -132,7 +132,7 @@ Return ticker for requested pair.
 <tr>
 <td>pair</td><td>str</td><td>valid pair like 'btc_usd', 'ltc_usd' etc.</td>
 </table>
-#### Returns
+###### Returns
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -141,9 +141,9 @@ Return ticker for requested pair.
 <td>-</td><td>list of json</td><td>fee</td>
 </table>
 
-### def trades(self, pair)
+###### def trades(self, pair)
 Return trades for requested pair.
-#### Parameters
+###### Parameters
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -151,7 +151,7 @@ Return trades for requested pair.
 <tr>
 <td>pair</td><td>str</td><td>valid pair like 'btc_usd', 'ltc_usd' etc.</td>
 </table>
-#### Returns
+###### Returns
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -160,9 +160,9 @@ Return trades for requested pair.
 <td>-</td><td>list of json(dict)</td><td>fee</td>
 </table>
 
-### depth(self, pair)
+###### depth(self, pair)
 Return depth for requested pair.
-#### Parameters
+###### Parameters
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -170,7 +170,7 @@ Return depth for requested pair.
 <tr>
 <td>pair</td><td>str</td><td>valid pair like 'btc_usd', 'ltc_usd' etc.</td>
 </table>
-#### Returns
+###### Returns
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -179,8 +179,8 @@ Return depth for requested pair.
 <td>-</td><td>list of json(dict)</td><td>fee</td>
 </table>
 
-### ------ btc-e API trade methods (auth-required) ------
-### getInfo(self)
+##### btc-e API trade methods (auth-required)
+###### getInfo(self)
 Returns following information:
 
 * current balance
@@ -189,8 +189,8 @@ Returns following information:
 * number of open orders
 * server time
 	
-#### Parameters: None
-#### Returns
+###### Parameters: None
+###### Returns
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -199,10 +199,10 @@ Returns following information:
 <td>-</td><td>list of json(dict)</td><td>various information about the account.</td>
 </table>
 
-### TransHistory(self, params)
+###### TransHistory(self, params)
 Returns history of transactions
 
-####  Parameters:
+###### Parameters:
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -210,7 +210,7 @@ Returns history of transactions
 <tr>
 <td>params</td><td>dict</td><td>keys: from, count, from_id, end_id, order, since, end with their values. i.e {'count': 5}</td>
 </table>
-#### Returns
+###### Returns
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -219,10 +219,10 @@ Returns history of transactions
 <td>-</td><td>list of json(dict)</td><td>transaction history.</td>
 </table>
 
-### TradeHistory(self, params)
+###### TradeHistory(self, params)
 Returns history of orders
 
-####  Parameters:
+###### Parameters:
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -231,7 +231,7 @@ Returns history of orders
 <td>params</td><td>dict</td><td>allowed keys: 'from', 'count', 'from_id', 
                         'end_id', 'order', 'since', 'end', 'pair'</td>
 </table>
-#### Returns
+###### Returns
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -240,9 +240,9 @@ Returns history of orders
 <td>-</td><td>list of json(dict)</td><td>יhistory of orders.</td>
 </table>
 
-### ActiveOrders(self, params)
+###### ActiveOrders(self, params)
 Returns active orders
-#### Parameters:
+###### Parameters:
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -250,7 +250,7 @@ Returns active orders
 <tr>
 <td>params</td><td>dict</td><td>allowed keys: 'pair'. i.e {'pair': 'ltc_usd'}</td>
 </table>
-#### Returns
+###### Returns
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -259,9 +259,9 @@ Returns active orders
 <td>-</td><td>list of json(dict)</td><td>active orders</td>
 </table>
 
-### Trade(self, params)
+###### Trade(self, params)
 Place new order.
-####  Parameters:
+###### Parameters:
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -270,7 +270,7 @@ Place new order.
 <td>params</td><td>dict</td><td>allowed keys: 'from', 'count', 'from_id', 
                         'end_id', 'order', 'since', 'end', 'pair'</td>
 </table>
-#### Returns
+###### Returns
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -279,9 +279,9 @@ Place new order.
 <td>-</td><td>list of json(dict)</td><td>returns funds, remains, received and more.</td>
 </table>
 
-### CancelOrder(self, params)
+###### CancelOrder(self, params)
 Cancel order.
-#### Parameters
+###### Parameters
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
@@ -289,7 +289,7 @@ Cancel order.
 <tr>
 <td>-</td><td>list of json(dict)</td><td>returns funds, remains, received and more.</td>
 </table>
-#### Returns
+###### Returns
 <table>
 <tr>
 <th>Name</th><th>Type</th><th>Description</th>
