@@ -1,299 +1,184 @@
 python-qbtce
 ============
 
-BTC-E API - implementation of btc-e.com API (crypto-currency exchange).
+```qbtce``` is a tool for interacting with the btc-e.com API, with this tool you can get ticker, depth, create orders, cancel order and more.
 
-## Usage examples
-	# importing Q class from qbtce.py
-	from qbtce import Q
-
-	# get last trades for LTC/USD pair
-	last_trades = q.trades('ltc_usd')
-
-	# to use api methods that require auth:
-	# you can set default key&secret in qbtce.py or call the constructor with key, secret arguments.
-	q = Q(key='YOUR_KEY', secret='YOUR_SECRET')
-	
-	# now, it is possible to call all the methods that require auth.
-	response = q.getInfo()
+##### Usage
+Let's create an object to work with the API.
+```python
+import qbtce
+api = qbtce.API()
+```
+```qbtce.API()``` also accepts ```key``` and ```secret``` parameters which is required for trading, however, for accessing public methods like ticker, depth, etc, those 
+parameters can be skipped.
 
 
+##### Ticker
+```python
+	api.ticker("ltc_usd")
+```
 
-#### Q class
+```json
+	{u'ltc_usd': {u'avg': 3.508,
+	  u'buy': 3.529999,
+	  u'high': 3.6,
+	  u'last': 3.53,
+	  u'low': 3.416,
+	  u'sell': 3.5171,
+	  u'updated': 1416668112,
+	  u'vol': 135779.64027,
+	  u'vol_cur': 38658.10338}}
+```
+##### Ticker for multiple currencies
+```python
+api.ticker("ltc_usd", "btc_usd")
+```
 
-###### \_\_init\_\_(key=\_\_default\_key, secret=\_\_default\_secret, nonce\_prefix='')
-Class constructor.
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>key</td><td>str</td><td>btc-e public key (optional)</td>
-</tr>
-<tr>
-<td>secret</td><td>str</td><td>btc-e secret key (optional)</td>
-</tr>
-<tr>
-<td>nonce_prefix</td><td>str</td><td>prefix for filename (optional)</td>
-</tr>
-</table>
+```json
+{u'btc_usd': {u'avg': 353.804995,
+  u'buy': 352.7,
+  u'high': 362.603,
+  u'last': 352.7,
+  u'low': 345.00699,
+  u'sell': 352.522,
+  u'updated': 1416668214,
+  u'vol': 2104478.11369,
+  u'vol_cur': 5950.96141},
+ u'ltc_usd': {u'avg': 3.508,
+  u'buy': 3.537062,
+  u'high': 3.6,
+  u'last': 3.53706,
+  u'low': 3.416,
+  u'sell': 3.5171,
+  u'updated': 1416668214,
+  u'vol': 135707.07088,
+  u'vol_cur': 38637.47309}}
+```
 
-###### \_\_save\_nonce(self)
-Responsible for saving nonce value to file (self.nonce_storage)
+##### Depth with an optional limit parameter
+```python
+api.depth("btc_usd", limit=5)
+```
 
-###### \_\_incr\_nonce(self)
-Incrementing nonce value.
-
-###### \_\_load\_nonce(self)
-Loads nonce value from storage(file self.nonce_storage).
-
-###### \_\_public\_query(self, method\_name, pair)
-Accepts method_name, pair and makes the actual call to btc-e. used for public methods such as: fee, ticker, trades, depth.
-
-###### Parameters
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>method_name</td><td>str</td><td>method name as described in the API</td>
-</tr>
-<tr>
-<td>pair</td><td>str</td><td>pair upon the method is called on, i.e. 'btc_usd'</td>
-</tr>
-</table>
-
-###### Returns
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>api_json</td><td>list of json(dict)</td><td>response from the server</td>
-</tr>
-</table>
-
-###### \_\_trade\_query(self, method\_name, method\_params):
-Calls the btc-e API methods for trading (auth-required): getInfo, TransHistory, TradeHistory, ActiveOrders, Trade, CancelOrder
-returns response as list of json's.
-
-###### Parameters
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>method_name</td><td>str</td><td>method name as described in the API</td>
-</tr>
-<tr>
-<td>method_params</td><td>dict</td><td>method arguments, each method have different args!</td>
-</tr>
-</table>
-
-###### Returns
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>api_json</td><td>list of json(dict)</td><td>response from the server</td>
-</table>
-
-##### btc-e API public (non-auth-required) methods
-###### fee(self, pair)
-Return fee for requested pair.
-
-###### Parameters
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>pair</td><td>str</td><td>valid pair like 'btc_usd', 'ltc_usd' etc.</td>
-</table>
-
-###### Returns
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>-</td><td>list of json</td><td>fee</td>
-</table>
+```json
+{u'btc_usd': {u'asks': [[351.86, 1.60132646],
+   [352.5, 1.2066],
+   [352.69, 0.01],
+   [352.701, 0.14266935],
+   [352.807, 0.011]],
+  u'bids': [[351.641, 0.021],
+   [351.64, 0.021],
+   [351.601, 0.07],
+   [351.6, 1.5],
+   [351.503, 0.01141469]]}}
+```
 
 
-###### ticker(self, pair)
-Return ticker for requested pair.
-###### Parameters
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>pair</td><td>str</td><td>valid pair like 'btc_usd', 'ltc_usd' etc.</td>
-</table>
-###### Returns
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>-</td><td>list of json</td><td>fee</td>
-</table>
+For trading, you have to create key and a secret in your btc-e account.
+Then, just create an object with key and a secret.
 
-###### def trades(self, pair)
-Return trades for requested pair.
-###### Parameters
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>pair</td><td>str</td><td>valid pair like 'btc_usd', 'ltc_usd' etc.</td>
-</table>
-###### Returns
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>-</td><td>list of json(dict)</td><td>fee</td>
-</table>
+##### Using trading api
+```python
+	import qbtce
+	api = qbtce.API(key="...", secret="...")
+```
 
-###### depth(self, pair)
-Return depth for requested pair.
-###### Parameters
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>pair</td><td>str</td><td>valid pair like 'btc_usd', 'ltc_usd' etc.</td>
-</table>
-###### Returns
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>-</td><td>list of json(dict)</td><td>fee</td>
-</table>
+##### Sell 1 NMC @ 0.85
+```python
+api.trade(pair="nmc_usd", type="sell", rate=0.85, amount=1)
+```
 
-##### btc-e API trade methods (auth-required)
-###### getInfo(self)
-Returns following information:
+```json
+{u'funds': {u'btc': 0,
+  u'cnh': 0,
+  u'eur': 0,
+  u'ftc': 0,
+  u'gbp': 0,
+  u'ltc': 0,
+  u'nmc': 0,
+  u'nvc': 0,
+  u'ppc': 0,
+  u'rur': 0,
+  u'trc': 0,
+  u'usd': 0.86726519,
+  u'xpm': 0},
+ u'order_id': 0,
+ u'received': 1,
+ u'remains': 0}
+```
 
-* current balance
-* API key priviliges
-* number of transactions
-* number of open orders
-* server time
-	
-###### Parameters: None
-###### Returns
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>-</td><td>list of json(dict)</td><td>various information about the account.</td>
-</table>
+##### Active orders
+```python
+	api.active_orders()
+```
 
-###### TransHistory(self, params)
-Returns history of transactions
+```json
+	{u'461587001': {u'amount': 1.0,
+	  u'pair': u'nmc_usd',
+	  u'rate': 0.88,
+	  u'status': 0,
+	  u'timestamp_created': 1416666122,
+	  u'type': u'sell'}}
+```
 
-###### Parameters:
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>params</td><td>dict</td><td>keys: from, count, from_id, end_id, order, since, end with their values. i.e {'count': 5}</td>
-</table>
-###### Returns
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>-</td><td>list of json(dict)</td><td>transaction history.</td>
-</table>
+##### Order information
+```python
+api.order_info(order_id=461587001)
+```
 
-###### TradeHistory(self, params)
-Returns history of orders
+```json
+{u'461587001': {u'amount': 1.0,
+  u'pair': u'nmc_usd',
+  u'rate': 0.88,
+  u'start_amount': 1.0,
+  u'status': 0,
+  u'timestamp_created': 1416666122,
+  u'type': u'sell'}}
+```
 
-###### Parameters:
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>params</td><td>dict</td><td>allowed keys: 'from', 'count', 'from_id', 
-                        'end_id', 'order', 'since', 'end', 'pair'</td>
-</table>
-###### Returns
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>-</td><td>list of json(dict)</td><td>יhistory of orders.</td>
-</table>
+##### Account information
+```python
+	api.get_account_info()
+```
 
-###### ActiveOrders(self, params)
-Returns active orders
-###### Parameters:
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>params</td><td>dict</td><td>allowed keys: 'pair'. i.e {'pair': 'ltc_usd'}</td>
-</table>
-###### Returns
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>-</td><td>list of json(dict)</td><td>active orders</td>
-</table>
+```json
+{u'funds': {u'btc': 0,
+  u'cnh': 0,
+  u'eur': 0,
+  u'ftc': 0,
+  u'gbp': 0,
+  u'ltc': 0,
+  u'nmc': 0,
+  u'nvc': 0,
+  u'ppc': 0,
+  u'rur': 0,
+  u'trc': 0,
+  u'usd': 0.86726519,
+  u'xpm': 0},
+ u'open_orders': 1,
+ u'rights': {u'info': 1, u'trade': 1, u'withdraw': 0},
+ u'server_time': 1416666392,
+ u'transaction_count': 0}
+```
 
-###### Trade(self, params)
-Place new order.
-###### Parameters:
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>params</td><td>dict</td><td>allowed keys: 'from', 'count', 'from_id', 
-                        'end_id', 'order', 'since', 'end', 'pair'</td>
-</table>
-###### Returns
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>-</td><td>list of json(dict)</td><td>returns funds, remains, received and more.</td>
-</table>
+##### Cancel order
+```python
+api.cancel_order(order_id=461587001)
+```
 
-###### CancelOrder(self, params)
-Cancel order.
-###### Parameters
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>-</td><td>list of json(dict)</td><td>returns funds, remains, received and more.</td>
-</table>
-###### Returns
-<table>
-<tr>
-<th>Name</th><th>Type</th><th>Description</th>
-</tr>
-<tr>
-<td>-</td><td>list of json(dict)</td><td>return order_id, funds.</td>
-</table>
+```json
+	{u'funds': {u'btc': 0.15926435,
+	  u'cnh': 0,
+	  u'eur': 0,
+	  u'ftc': 0,
+	  u'gbp': 0,
+	  u'ltc': 28.22469696,
+	  u'nmc': 11.10283754,
+	  u'nvc': 0,
+	  u'ppc': 0,
+	  u'rur': 0,
+	  u'trc': 0,
+	  u'usd': 0.86726519,
+	  u'xpm': 0},
+	 u'order_id': 461587001}
+```
