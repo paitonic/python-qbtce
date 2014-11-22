@@ -33,7 +33,6 @@ def retry_connection(f):
                 success = True
                 return result
             except:
-                msg = "{0}: {1} --> connection problems . retry in {2} seconds."
                 print "{0}: {1} --> connection problems . retry in {2} seconds.".format(t(), f.__name__, seconds_to_retry)
                 time.sleep(seconds_to_retry)
         # return None
@@ -45,7 +44,7 @@ class Q:
     Methods:
     __init__()      -- constructor. initialize class properties.
     __save_nonce()  -- save last nonce value to file.
-    __incr_nonce()  -- increment nonce value.
+    __get_nonce()   -- get new nonce value.
     __load_nonce()  -- load last nonce value from file.
     public_query()  -- make public (non-auth required) API request.
     trade_query()   -- make trade (auth-required) API request.
@@ -66,12 +65,9 @@ class Q:
     q.ticker('btc_usd') # btc/usd ticker
 
     """
-    # set default key and secret
-    __default_key = ""
-    __default_secret = ""
 
     # TODO: set nonce_prefix to last N letters of key/secret?
-    def __init__(self, key=__default_key, secret=__default_secret, nonce_prefix=''):
+    def __init__(self, key="", secret=""):
         """Constructor
 
         Initialize properties of 'Connection' instance.
@@ -79,43 +75,17 @@ class Q:
         Name            Type     Desc
         key             str      BTC-E key
         secret          str      BTC-E secret
-        nonce_prefix    str      prefix for nonce storage file
         """
 
         self.public_base_url = "https://btc-e.com/api/2/"
         self.BTCE_API_KEY = key
         self.BTCE_API_SECRET = secret
 
-        self.nonce_storage = str(nonce_prefix) + "_nonce"  # storage file
-        self.nonce = self.__load_nonce()
-
-    def __save_nonce(self):
-        """Saves nonce value to file.
-            self.nonce_storage is the file where nonce be saved to.
+    def __get_nonce(self):
+        """Get new nonce value.
         """
-        try:
-            f = open(self.nonce_storage, "w")
-            f.write(str(self.nonce))
-            f.close()
-        except:
-            print '{0}: failed saving nonce value.'.format(t())
-
-    def __incr_nonce(self):
-        """Increment the nonce value.
-            Define your own algorithm if you wish.
-        """
-        self.nonce += 1
-        self.__save_nonce()
-        return self.nonce
-
-    def __load_nonce(self):
-        """Load nonce value from storage self.nonce_storage) and assign it to self.nonce."""
-        try:
-            f = open(self.nonce_storage, "r")
-            nonce = int(f.read())
-            return nonce
-        except:
-            return 1
+        print "nonce: ", int(time.time())
+        return int(time.time())
 
     def __public_query(self, method_name, pair):
         """Calls public API methods: fee, ticker, trades, depth and returns response as JSON object.
@@ -157,7 +127,7 @@ class Q:
         Name            Type                    Desc
         api_json        list of json(dict)    response from the server
         """
-        params = {'nonce': self.__incr_nonce(), 'method': method_name}
+        params = {'nonce': self.__get_nonce(), 'method': method_name}
 
         # if parameters supplied, add them to the existing parameters.
         if method_params != {}:
@@ -185,7 +155,7 @@ class Q:
 
         # bad request handling
         if 'error' in api_json and str(api_json).find('invalid nonce') != -1:
-            self.__incr_nonce()
+            self.__get_nonce()
         elif 'error' in api_json:  # other error
             print "{0} an error has been occured.\napi_json: {1}".format(t(), api_json)
         return api_json
@@ -277,7 +247,7 @@ class Q:
 
         Returns:
         Name    Type                Desc
-        -       list of json(dict)     יhistory of orders.
+        -       list of json(dict)     history of orders.
         """
         return self.__trade_query('TradeHistory', params)
 
