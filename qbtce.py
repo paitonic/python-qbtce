@@ -70,21 +70,26 @@ class Q:
         """
         method = kwargs.get('method')
         params = kwargs.get('params')
+
+        if params:
+            params = urllib.urlencode(params)
+
         pairs = kwargs.get('pairs', None)
         if pairs:
             pairs = '-'.join(pairs)
         
-        request_url = "{location}{method}/{pairs}{params}".format(
+        # build the request url
+        request_url = "{location}{method}/{pairs}?{params}".format(
             location=self.public_api3_url,
             method=method,
             pairs=pairs or '',
             params=params or ''
             )
-
+        # create connection
         connection = retry_connection(urllib.urlopen)
         api_response = connection(request_url)
 
-        # try to parse JSON
+        # try parsing api response (json)
         try:
             api_json = json.load(api_response)
         except:
@@ -140,28 +145,38 @@ class Q:
         return api_json
 
     # --- public api v3 --- #
-    def fee(self, *args):
+    def fee(self, *args, **kwargs):
         """
         """
-        return self.public_api3(method='fee', pairs=args)
+        params = {
+            'ignore_invalid': kwargs.get('ignore_invalid', 0)
+        }
+        return self.public_api3(method='fee', params=params, pairs=args)
 
-    def ticker(self, *args):
+    def ticker(self, *args, **kwargs):
         """
         """
-        return self.public_api3(method='ticker', pairs=args)
 
-    def trades(self, *args):
+        params = {
+            'ignore_invalid': kwargs.get('ignore_invalid', 0)
+            }
+        return self.public_api3(method='ticker', params=params, pairs=args)
+
+    def trades(self, *args, **kwargs):
         """
         """
-        return self.public_api3(method='trades', pairs=args)
+        params = {
+            'ignore_invalid': kwargs.get('ignore_invalid', 0)
+            }
+        return self.public_api3(method='trades', params=params, pairs=args)
 
     def depth(self, *args, **kwargs):
         """
         """
-        limit = kwargs.get("limit", None)
-        params = None
-        if limit:
-            params = "?limit={limit}".format(limit=limit)
+        params = {
+            'limit': kwargs.get("limit", None),
+            'ignore_invalid': kwargs.get('ignore_invalid', 0)
+            }
         return self.public_api3(method='depth', params=params, pairs=args)
 
     def info(self):
