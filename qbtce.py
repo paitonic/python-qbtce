@@ -41,32 +41,10 @@ def retry_connection(f):
 
 class Q:
     """BTC-E API class.
-    Methods:
-    __init__()      -- constructor. initialize class properties.
-    __save_nonce()  -- save last nonce value to file.
-    __get_nonce()   -- get new nonce value.
-    __load_nonce()  -- load last nonce value from file.
-    public_query()  -- make public (non-auth required) API request.
-    trade_query()   -- make trade (auth-required) API request.
-    fee()           -- return pair fee.
-    ticker()        -- return pair ticker.
-    trades()        -- return pair trades.
-    depth()         -- return pair depth.
-    getInfo()       -- return information about account.
-    TransHistory()  -- return transfer history.
-    TradeHistory()  -- return trade history.
-    ActiveOrders()  -- return active orders.
-    Trade()         -- place trade order.
-    CancelOrder()   -- cancel existing order.
-
-    Usage:
-    from qbtce import Q
-    q = Q(key='KEY', secret='SECRET')
-    q.ticker('btc_usd') # btc/usd ticker
 
     """
 
-    # TODO: set nonce_prefix to last N letters of key/secret?
+
     def __init__(self, key="", secret=""):
         """Constructor
 
@@ -78,29 +56,30 @@ class Q:
         """
 
         self.public_base_url = "https://btc-e.com/api/2/"
+        self.public_api3_url = "https://btc-e.com/api/3/"
         self.BTCE_API_KEY = key
         self.BTCE_API_SECRET = secret
 
     def __get_nonce(self):
         """Get new nonce value.
         """
-        print "nonce: ", int(time.time())
         return int(time.time())
 
-    def __public_query(self, method_name, pair):
-        """Calls public API methods: fee, ticker, trades, depth and returns response as JSON object.
-
-        Parameters:
-        Name            Type    Desc
-        method_name     str     method name as described in the API
-        pair            str     pair upon the method is called on, i.e. 'btc_usd'
-
-        Returns:
-        Name        Type                    Desc
-        api_json    list of json(dict)        response from the server
+    def public_api3(self, *args, **kwargs):
         """
-
-        request_url = self.public_base_url + pair + '/' + method_name
+        """
+        method = kwargs.get('method')
+        params = kwargs.get('params')
+        pairs = kwargs.get('pairs', None)
+        if pairs:
+            pairs = '-'.join(pairs)
+        
+        request_url = "{location}{method}/{pairs}{params}".format(
+            location=self.public_api3_url,
+            method=method,
+            pairs=pairs or '',
+            params=params or ''
+            )
 
         connection = retry_connection(urllib.urlopen)
         api_response = connection(request_url)
@@ -109,7 +88,7 @@ class Q:
         try:
             api_json = json.load(api_response)
         except:
-            print "{0}: failed parsing JSON. Possible reasons: API has been changed? Bad request? Quitting.\nrequest_url = {1}".format(t(), request_url)
+            print "{0} {1} : JSON parsing failed.\n".format(t(), request_url)
             sys.exit(1)
 
         return api_json
@@ -160,54 +139,35 @@ class Q:
             print "{0} an error has been occured.\napi_json: {1}".format(t(), api_json)
         return api_json
 
-    # --- basic public methods --- #
-    def fee(self, pair):
-        """Returns fee for requested pair.
-        parameters:
-        Name    Type    Desc
-        pair    str     valid pair like 'btc_usd', 'ltc_usd' etc.
-
-        Returns:
-        Name    Type                Desc
-        -       list of json(dict)    fee
+    # --- public api v3 --- #
+    def fee(self, *args):
         """
-        return self.__public_query('fee', pair)
-
-    def ticker(self, pair):
-        """Returns ticker for requested pair.
-        parameters:
-        Name    Type    Desc
-        pair    str     valid pair like 'btc_usd', 'ltc_usd' etc.
-
-        Returns:
-        Name    Type            Desc
-        -       list of json(dict)    ticker
         """
-        return self.__public_query('ticker', pair)
+        return self.public_api3(method='fee', pairs=args)
 
-    def trades(self, pair):
-        """Returns trades for requested pair.
-        parameters:
-        Name    Type    Desc
-        pair    str     valid pair like 'btc_usd', ltc_usd' etc.
-
-        Returns:
-        Name    Type            Desc
-        -       list of json(dict)    trades
+    def ticker(self, *args):
         """
-        return self.__public_query('trades', pair)
-
-    def depth(self, pair):
-        """Returns depth for requested pair.
-        Parameters:
-        Name    Type    Desc
-        pair    str     valid pair like 'btc_usd', ltc_usd' etc.
-
-        Returns:
-        Name    Type            Desc
-        -       list of json(dict)    depth
         """
-        return self.__public_query('depth', pair)
+        return self.public_api3(method='ticker', pairs=args)
+
+    def trades(self, *args):
+        """
+        """
+        return self.public_api3(method='trades', pairs=args)
+
+    def depth(self, *args, **kwargs):
+        """
+        """
+        limit = kwargs.get("limit", None)
+        params = None
+        if limit:
+            params = "?limit={limit}".format(limit=limit)
+        return self.public_api3(method='depth', params=params, pairs=args)
+
+    def info(self):
+        """
+        """
+        return self.public_api3(method='info')
 
     # --- trade methods --- #
     def getInfo(self):
@@ -286,5 +246,3 @@ class Q:
         -       list of json(dict)  return order_id, funds.
         """
         return self.__trade_query('CancelOrder', params)
-
-    # --- wrappers --- #
